@@ -1,0 +1,126 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Milchtakt Live</title>
+
+<script src="https://cdn.tailwindcss.com"></script>
+</head>
+
+<body class="bg-gray-100 p-6">
+
+<h1 class="text-2xl font-bold mb-4">Milchtakt Live</h1>
+
+<div class="grid grid-cols-2 gap-2 mb-4">
+<input id="start" type="datetime-local" class="p-2 border">
+<input id="end" type="datetime-local" class="p-2 border">
+<input id="takt" type="number" value="80" class="p-2 border">
+<input id="steps" type="number" value="49" class="p-2 border">
+</div>
+
+<table class="w-full bg-white">
+<thead>
+<tr class="bg-gray-200">
+<th>Charge</th>
+<th>Geplant</th>
+<th>Ist</th>
+</tr>
+</thead>
+<tbody id="body"></tbody>
+</table>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import { getFirestore, doc, setDoc, onSnapshot }
+from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+// 🔥 DEINE FIREBASE CONFIG HIER EINTRAGEN
+const firebaseConfig = {
+apiKey: "AIzaSyCrxtUOlcX0RQz7Ax3bU7NnOOgO2zKHMdg",
+authDomain: "mtrechner-27280.firebaseapp.com",
+projectId: "mtrechner-27280"
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+const ref = doc(db, "milchtakt", "liveData");
+
+const start = document.getElementById("start");
+const end = document.getElementById("end");
+const takt = document.getElementById("takt");
+const steps = document.getElementById("steps");
+const body = document.getElementById("body");
+
+let actuals = new Map();
+
+// ✅ speichern (für alle sichtbar)
+async function save() {
+await setDoc(ref, {
+start: start.value,
+end: end.value,
+takt: takt.value,
+steps: steps.value,
+actuals: Array.from(actuals)
+});
+}
+
+// ✅ live synchronisieren
+onSnapshot(ref, (snap) => {
+if (!snap.exists()) return;
+const d = snap.data();
+
+start.value = d.start || "";
+end.value = d.end || "";
+takt.value = d.takt || 80;
+steps.value = d.steps || 49;
+actuals = new Map(d.actuals || []);
+
+render();
+});
+
+// ✅ Tabelle zeichnen
+function render() {
+body.innerHTML = "";
+if (!start.value) return;
+
+let time = new Date(start.value);
+
+for (let i = 1; i <= steps.value; i++) {
+
+const tr = document.createElement("tr");
+
+const td1 = document.createElement("td");
+td1.textContent = i;
+tr.appendChild(td1);
+
+const td2 = document.createElement("td");
+td2.textContent = time.toLocaleString();
+tr.appendChild(td2);
+
+const td3 = document.createElement("td");
+const input = document.createElement("input");
+input.type = "datetime-local";
+input.value = actuals.get(i) || "";
+
+input.onchange = () => {
+if (input.value) actuals.set(i, input.value);
+else actuals.delete(i);
+save();
+};
+
+td3.appendChild(input);
+tr.appendChild(td3);
+
+body.appendChild(tr);
+
+time = new Date(time.getTime() + takt.value * 60000);
+}
+}
+
+// Events
+[start, end, takt, steps].forEach(el => el.onchange = save);
+</script>
+
+</body>
+</html>
