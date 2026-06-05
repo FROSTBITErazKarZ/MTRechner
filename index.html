@@ -1,126 +1,1042 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="de">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Milchtakt Live</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <title>Modernes Tablet Info Dashboard</title>
+  <style>
+    :root{
+      --bg: #f4f7fb;
+      --panel: rgba(255,255,255,0.72);
+      --panel-strong: rgba(255,255,255,0.88);
+      --text: #0f172a;
+      --muted: #64748b;
+      --line: rgba(15,23,42,0.08);
+      --glow: 0 20px 55px rgba(15,23,42,0.10);
+      --accent: #2563eb;
+      --accent-soft: rgba(37,99,235,0.12);
+      --good: #10b981;
+      --bad: #ef4444;
+      --warning: #f59e0b;
+      --chip: rgba(15,23,42,0.06);
+      --header-grad: linear-gradient(135deg, rgba(37,99,235,0.95), rgba(99,102,241,0.92), rgba(14,165,233,0.88));
+    }
 
-<script src="https://cdn.tailwindcss.com"></script>
+    body.dark{
+      --bg: #07111f;
+      --panel: rgba(11,18,32,0.72);
+      --panel-strong: rgba(11,18,32,0.88);
+      --text: #ecf4ff;
+      --muted: #94a3b8;
+      --line: rgba(255,255,255,0.09);
+      --glow: 0 20px 55px rgba(0,0,0,0.35);
+      --accent: #60a5fa;
+      --accent-soft: rgba(96,165,250,0.14);
+      --chip: rgba(255,255,255,0.06);
+      --header-grad: linear-gradient(135deg, rgba(15,23,42,0.95), rgba(30,41,59,0.94), rgba(14,116,144,0.80));
+    }
+
+    * { box-sizing: border-box; }
+    html, body { height: 100%; }
+
+    body{
+      margin:0;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif;
+      background:
+        radial-gradient(circle at top left, rgba(59,130,246,0.10), transparent 30%),
+        radial-gradient(circle at top right, rgba(14,165,233,0.12), transparent 28%),
+        radial-gradient(circle at bottom left, rgba(99,102,241,0.10), transparent 25%),
+        var(--bg);
+      color: var(--text);
+      overflow: hidden;
+      transition: background .35s ease, color .35s ease;
+    }
+
+    .shell{
+      height:100dvh;
+      padding: clamp(10px, 1vw, 14px);
+      display:grid;
+      grid-template-rows: auto minmax(0, 1fr);
+      gap: clamp(10px, 1vw, 14px);
+    }
+
+    .glass{
+      backdrop-filter: blur(24px);
+      -webkit-backdrop-filter: blur(24px);
+      background: var(--panel);
+      border: 1px solid var(--line);
+      box-shadow: var(--glow);
+    }
+
+    .header{
+      border-radius: 26px;
+      background: var(--header-grad);
+      color: white;
+      padding: clamp(14px, 1.2vw, 18px) clamp(16px, 1.4vw, 20px);
+      display:grid;
+      grid-template-columns: minmax(260px, 1.5fr) auto auto;
+      gap:14px;
+      align-items:center;
+      min-height: clamp(82px, 10vh, 96px);
+    }
+
+    .welcome-title{
+      font-size: clamp(1.8rem, 3vw, 2.8rem);
+      font-weight: 800;
+      letter-spacing: -0.03em;
+      margin: 0 0 6px;
+    }
+
+    .welcome-sub{
+      margin:0;
+      color: rgba(255,255,255,0.82);
+      font-size: 1rem;
+    }
+
+    .clock-wrap{
+      text-align:right;
+      min-width: 210px;
+    }
+
+    .clock{
+      font-size: clamp(2rem, 3.8vw, 3.3rem);
+      font-weight: 800;
+      line-height: 0.95;
+      letter-spacing: -0.05em;
+    }
+
+    .date{
+      margin-top:8px;
+      color: rgba(255,255,255,0.82);
+      font-size: 1rem;
+    }
+
+    .actions{
+      display:flex;
+      align-items:center;
+      gap:14px;
+      justify-self:end;
+    }
+
+    .fs-wrap{
+      display:flex;
+      align-items:center;
+      gap:10px;
+      padding:10px 14px;
+      border-radius: 999px;
+      background: rgba(255,255,255,0.14);
+      border: 1px solid rgba(255,255,255,0.18);
+    }
+
+    .fs-label{
+      font-size:.95rem;
+      color: rgba(255,255,255,0.92);
+      white-space: nowrap;
+    }
+
+    .switch{
+      position:relative;
+      width:62px;
+      height:34px;
+      display:inline-block;
+    }
+
+    .switch input{ display:none; }
+
+    .slider{
+      position:absolute;
+      inset:0;
+      border-radius:999px;
+      background: rgba(255,255,255,0.25);
+      cursor:pointer;
+      transition:.25s ease;
+      border:1px solid rgba(255,255,255,0.18);
+    }
+
+    .slider:before{
+      content:"";
+      position:absolute;
+      height:26px;
+      width:26px;
+      left:4px;
+      top:3px;
+      border-radius:50%;
+      background:white;
+      transition:.25s ease;
+      box-shadow: 0 6px 12px rgba(0,0,0,.18);
+    }
+
+    .switch input:checked + .slider{
+      background: rgba(255,255,255,0.45);
+    }
+
+    .switch input:checked + .slider:before{
+      transform: translateX(28px);
+    }
+
+    .main{
+      min-height:0;
+      display:grid;
+      grid-template-columns: minmax(300px, 31%) minmax(0, 1fr);
+      gap: clamp(10px, 1vw, 14px);
+    }
+
+    .panel{
+      border-radius: 28px;
+      min-height:0;
+      height:100%;
+      overflow:hidden;
+    }
+
+    .panel-inner{
+      height:100%;
+      min-height:0;
+      display:grid;
+      grid-template-rows: auto auto auto auto minmax(0, 1fr);
+      padding: clamp(12px, 1vw, 16px);
+      gap: clamp(10px, 1vw, 14px);
+    }
+
+    .stocks-panel .panel-inner{
+      grid-template-rows: auto auto minmax(0, 1fr) auto;
+    }
+
+    .panel-head{
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      gap:12px;
+    }
+
+    .panel-title{
+      font-size: clamp(1rem, 1.1vw + 0.7rem, 1.35rem);
+      font-weight: 800;
+      letter-spacing: -0.02em;
+      margin:0;
+    }
+
+    .chip{
+      border-radius:999px;
+      background: var(--chip);
+      color: var(--muted);
+      padding: clamp(6px, 0.7vw, 8px) clamp(10px, 1vw, 12px);
+      font-size: clamp(.74rem, 0.5vw + 0.55rem, .9rem);
+      border:1px solid var(--line);
+    }
+
+    .weather-now{
+      display:grid;
+      grid-template-columns: auto 1fr;
+      gap: clamp(10px, 1vw, 14px);
+      align-items:center;
+      border-radius: 22px;
+      padding: clamp(12px, 1.2vw, 18px);
+      background: linear-gradient(135deg, var(--accent-soft), transparent);
+      border:1px solid var(--line);
+      min-height: clamp(90px, 15%, 145px);
+    }
+
+    .weather-icon{
+      width: clamp(56px, 4.2vw, 82px);
+      height: clamp(56px, 4.2vw, 82px);
+      border-radius: clamp(16px, 1.2vw, 20px);
+      display:grid;
+      place-items:center;
+      font-size: clamp(1.6rem, 1.7vw, 2.3rem);
+      background: var(--panel-strong);
+      border: 1px solid var(--line);
+      box-shadow: inset 0 0 0 1px rgba(255,255,255,0.03);
+    }
+
+    .weather-temp{
+      font-size: clamp(1.8rem, 2.2vw, 2.8rem);
+      font-weight:800;
+      line-height:0.95;
+      letter-spacing:-0.04em;
+    }
+
+    .weather-desc{
+      margin-top:6px;
+      color: var(--muted);
+      font-size: clamp(.88rem, 0.6vw + 0.7rem, 1.02rem);
+    }
+
+    .weather-meta{
+      display:grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap:10px;
+    }
+
+    .meta-card{
+      border-radius:18px;
+      background: var(--panel-strong);
+      border:1px solid var(--line);
+      padding: clamp(10px, 1vw, 14px);
+      min-height: clamp(70px, 10%, 96px);
+      display:flex;
+      flex-direction:column;
+      justify-content:center;
+    }
+
+    .meta-label{
+      color: var(--muted);
+      font-size: clamp(.72rem, 0.4vw + 0.58rem, .88rem);
+      margin-bottom:8px;
+    }
+
+    .meta-value{
+      font-size: clamp(.96rem, 0.9vw + 0.55rem, 1.2rem);
+      font-weight:700;
+    }
+
+    .forecast{
+      min-height:0;
+      display:grid;
+      grid-template-rows: repeat(5, minmax(0, 1fr));
+      gap: clamp(8px, 0.8vw, 10px);
+      overflow:hidden;
+    }
+
+    .day-row{
+      display:grid;
+      grid-template-columns: minmax(0, 1fr) auto auto auto;
+      gap: clamp(8px, 0.8vw, 10px);
+      align-items:center;
+      border-radius:18px;
+      padding: clamp(10px, 0.9vw, 14px);
+      background: var(--panel-strong);
+      border:1px solid var(--line);
+      min-height: 0;
+    }
+
+    .day-name{
+      font-weight:700;
+      font-size: clamp(.82rem, 0.6vw + 0.62rem, 1rem);
+    }
+
+    .day-icon{
+      font-size: clamp(1rem, 0.9vw + 0.65rem, 1.3rem);
+      width: clamp(28px, 2.2vw, 36px);
+      text-align:center;
+    }
+
+    .day-desc{
+      color: var(--muted);
+      font-size: clamp(.76rem, 0.5vw + 0.58rem, .94rem);
+      text-align:right;
+      min-width: clamp(82px, 8vw, 112px);
+    }
+
+    .day-temp{
+      font-weight:800;
+      white-space:nowrap;
+      min-width: clamp(64px, 6vw, 82px);
+      text-align:right;
+      font-size: clamp(.82rem, 0.5vw + 0.62rem, 1rem);
+    }
+
+    .stocks-grid{
+      min-height:0;
+      height:100%;
+      display:grid;
+      grid-template-columns: repeat(auto-fit, minmax(clamp(130px, 13vw, 180px), 1fr));
+      grid-auto-rows: 1fr;
+      gap: clamp(8px, 0.9vw, 12px);
+      overflow:hidden;
+      align-content:stretch;
+    }
+
+    .stock-card{
+      min-height: 0;
+      height: 100%;
+      border-radius:20px;
+      padding: clamp(12px, 1.2vw, 18px);
+      background: var(--panel-strong);
+      border:1px solid var(--line);
+      display:flex;
+      flex-direction:column;
+      gap: clamp(10px, 1vw, 14px);
+      justify-content:space-between;
+      position:relative;
+      overflow:hidden;
+    }
+
+    .stock-card::after{
+      content:"";
+      position:absolute;
+      inset:auto -18px -18px auto;
+      width:86px;
+      height:86px;
+      border-radius:50%;
+      background: linear-gradient(135deg, transparent, rgba(255,255,255,0.10));
+      pointer-events:none;
+    }
+
+    .stock-top{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:10px;
+    }
+
+    .asset{
+      display:flex;
+      align-items:center;
+      gap:14px;
+      min-width:0;
+    }
+
+    .logo{
+      width: clamp(52px, 4vw, 66px);
+      height: clamp(52px, 4vw, 66px);
+      border-radius: clamp(12px, 1vw, 16px);
+      display:grid;
+      place-items:center;
+      border:1px solid var(--line);
+      background: rgba(255,255,255,0.92);
+      overflow:hidden;
+      flex-shrink:0;
+    }
+
+    .logo img{
+      width: clamp(28px, 2.2vw, 36px);
+      height: clamp(28px, 2.2vw, 36px);
+      object-fit:contain;
+    }
+
+    body.dark .logo{
+      background: rgba(255,255,255,0.95);
+    }
+
+    .asset-name{
+      font-weight:800;
+      font-size: clamp(1.08rem, 0.95vw + 0.8rem, 1.3rem);
+      letter-spacing:-0.02em;
+    }
+
+    .asset-symbol{
+      color: var(--muted);
+      font-size: clamp(.88rem, 0.65vw + 0.64rem, 1.02rem);
+      margin-top:3px;
+    }
+
+    .value{
+      font-size: clamp(1.35rem, 1.8vw + 0.9rem, 2.1rem);
+      font-weight:800;
+      letter-spacing:-0.03em;
+      white-space:nowrap;
+      overflow:hidden;
+      text-overflow:ellipsis;
+    }
+
+    .delta{
+      align-self:flex-start;
+      padding: clamp(5px, 0.6vw, 7px) clamp(8px, 0.9vw, 10px);
+      border-radius:999px;
+      font-size: clamp(.7rem, 0.4vw + 0.55rem, .86rem);
+      font-weight:700;
+      background: var(--chip);
+      border:1px solid var(--line);
+    }
+
+    .up{
+      color: var(--good);
+      background: rgba(16,185,129,0.10);
+      border-color: rgba(16,185,129,0.20);
+    }
+
+    .down{
+      color: var(--bad);
+      background: rgba(239,68,68,0.10);
+      border-color: rgba(239,68,68,0.18);
+    }
+
+    .neutral{
+      color: var(--warning);
+      background: rgba(245,158,11,0.10);
+      border-color: rgba(245,158,11,0.18);
+    }
+
+    .status{
+      border-radius:16px;
+      padding: clamp(10px, 0.9vw, 14px);
+      font-size: clamp(.78rem, 0.5vw + 0.62rem, .94rem);
+      color: var(--muted);
+      background: var(--panel-strong);
+      border:1px solid var(--line);
+    }
+
+    .small{
+      font-size: clamp(.7rem, 0.4vw + 0.56rem, .84rem);
+      color: var(--muted);
+    }
+
+    ::-webkit-scrollbar{ width:10px; height:10px; }
+    ::-webkit-scrollbar-thumb{
+      background: rgba(100,116,139,0.30);
+      border-radius:999px;
+      border:2px solid transparent;
+      background-clip: padding-box;
+    }
+
+    @media (max-width: 980px){
+      body{ overflow:auto; }
+      .shell{ height:auto; min-height:100dvh; }
+      .header{ grid-template-columns: 1fr; }
+      .clock-wrap{ text-align:left; }
+      .actions{ justify-self:start; }
+      .main{ grid-template-columns: 1fr; }
+      .panel-inner,
+      .stocks-panel .panel-inner{
+        grid-template-rows: auto auto auto auto minmax(260px, auto);
+      }
+      .stocks-grid{
+        grid-template-columns: repeat(2, minmax(0,1fr));
+        grid-auto-rows: minmax(140px, auto);
+        overflow:auto;
+      }
+      .forecast{
+        grid-template-rows: none;
+        overflow:auto;
+      }
+    }
+
+    @media (max-width: 640px){
+      .stocks-grid{ grid-template-columns: 1fr; }
+      .weather-meta{ grid-template-columns: 1fr; }
+      .day-row{ grid-template-columns: 1fr auto auto; }
+      .day-desc{ display:none; }
+    }
+
+    @media (orientation: landscape) and (min-width: 900px){
+      .shell{
+        padding: 12px;
+        gap: 12px;
+      }
+
+      .header{
+        min-height: 88px;
+        padding: 14px 18px;
+      }
+
+      .welcome-title{
+        font-size: clamp(1.7rem, 2.5vw, 2.5rem);
+      }
+
+      .welcome-sub{
+        font-size: .95rem;
+      }
+
+      .clock{
+        font-size: clamp(1.9rem, 3.2vw, 3rem);
+      }
+
+      .date{
+        font-size: .95rem;
+      }
+
+      .main{
+        grid-template-columns: minmax(320px, 30%) minmax(0, 1fr);
+        gap: 12px;
+      }
+
+      .panel-inner{
+        padding: 14px;
+        gap: 12px;
+      }
+
+      .stocks-grid{
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+      }
+    }
+
+    @media (orientation: landscape) and (min-width: 1200px){
+      .main{
+        grid-template-columns: minmax(340px, 29%) minmax(0, 1fr);
+      }
+      .stocks-grid{
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+      }
+    }
+
+    @media (orientation: landscape) and (min-width: 1450px){
+      .stocks-grid{
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+      }
+    }
+
+    @media (max-height: 820px){
+      .weather-now{
+        padding: 10px 12px;
+      }
+      .panel-inner{
+        gap: 10px;
+      }
+    }
+  </style>
 </head>
+<body class="dark">
+  <div class="shell">
+    <header class="header glass">
+      <div>
+        <h1 class="welcome-title">Willkommen Danilo</h1>
+        <p class="welcome-sub" id="locationLabel">Tablet Info Dashboard wird geladen…</p>
+      </div>
 
-<body class="bg-gray-100 p-6">
+      <div class="clock-wrap">
+        <div class="clock" id="clock">--:--</div>
+        <div class="date" id="date">--</div>
+      </div>
 
-<h1 class="text-2xl font-bold mb-4">Milchtakt Live</h1>
+      <div class="actions">
+        <div class="fs-wrap">
+          <span class="fs-label">Vollbild</span>
+          <label class="switch">
+            <input type="checkbox" id="fullscreenToggle">
+            <span class="slider"></span>
+          </label>
+        </div>
+      </div>
+    </header>
 
-<div class="grid grid-cols-2 gap-2 mb-4">
-<input id="start" type="datetime-local" class="p-2 border">
-<input id="end" type="datetime-local" class="p-2 border">
-<input id="takt" type="number" value="80" class="p-2 border">
-<input id="steps" type="number" value="49" class="p-2 border">
-</div>
+    <main class="main">
+      <section class="panel glass">
+        <div class="panel-inner">
+          <div class="panel-head">
+            <h2 class="panel-title">Aktuelles Wetter</h2>
+            <div class="chip" id="weatherUpdated">wird geladen…</div>
+          </div>
 
-<table class="w-full bg-white">
-<thead>
-<tr class="bg-gray-200">
-<th>Charge</th>
-<th>Geplant</th>
-<th>Ist</th>
-</tr>
-</thead>
-<tbody id="body"></tbody>
-</table>
+          <div class="weather-now">
+            <div class="weather-icon" id="weatherIcon">⛅</div>
+            <div>
+              <div class="weather-temp" id="weatherTemp">--°</div>
+              <div class="weather-desc" id="weatherDesc">Wetterdaten werden geladen…</div>
+            </div>
+          </div>
 
-<script type="module">
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-import { getFirestore, doc, setDoc, onSnapshot }
-from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+          <div class="weather-meta">
+            <div class="meta-card">
+              <div class="meta-label">Wind</div>
+              <div class="meta-value" id="windValue">-- km/h</div>
+            </div>
+            <div class="meta-card">
+              <div class="meta-label">Niederschlag</div>
+              <div class="meta-value" id="rainValue">-- %</div>
+            </div>
+            <div class="meta-card">
+              <div class="meta-label">Tag / Nacht</div>
+              <div class="meta-value" id="sunValue">--</div>
+            </div>
+          </div>
 
-// 🔥 DEINE FIREBASE CONFIG HIER EINTRAGEN
-const firebaseConfig = {
-apiKey: "AIzaSyCrxtUOlcX0RQz7Ax3bU7NnOOgO2zKHMdg",
-authDomain: "mtrechner-27280.firebaseapp.com",
-projectId: "mtrechner-27280"
-};
+          <div class="panel-head" style="margin-top:2px;">
+            <h3 class="panel-title" style="font-size:1.05rem;">5-Tage-Vorhersage</h3>
+            <div class="chip">stündliches Update</div>
+          </div>
 
-const app = initializeApp(firebaseConfig);
-const db = getFirestore(app);
-const ref = doc(db, "milchtakt", "liveData");
+          <div class="forecast" id="forecastList">
+            <div class="status">Wettervorhersage wird geladen…</div>
+          </div>
+        </div>
+      </section>
 
-const start = document.getElementById("start");
-const end = document.getElementById("end");
-const takt = document.getElementById("takt");
-const steps = document.getElementById("steps");
-const body = document.getElementById("body");
+      <section class="panel glass stocks-panel">
+        <div class="panel-inner">
+          <div class="panel-head">
+            <h2 class="panel-title">Aktien & Krypto</h2>
+            <div class="chip" id="marketUpdated">wird geladen…</div>
+          </div>
 
-let actuals = new Map();
+          <div id="marketStatus" class="status">
+            Börsen- und Kryptodaten werden geladen…
+          </div>
 
-// ✅ speichern (für alle sichtbar)
-async function save() {
-await setDoc(ref, {
-start: start.value,
-end: end.value,
-takt: takt.value,
-steps: steps.value,
-actuals: Array.from(actuals)
-});
-}
+          <div class="stocks-grid" id="stocksGrid"></div>
 
-// ✅ live synchronisieren
-onSnapshot(ref, (snap) => {
-if (!snap.exists()) return;
-const d = snap.data();
+          <div class="small">
+            Live-Kurse: Aktien über Finnhub, Krypto über CoinGecko. Wetter aktualisiert sich stündlich, Marktwerte alle 5 Minuten. Bei Finnhub-Rate-Limits werden zuletzt geladene Werte weiter angezeigt.
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
 
-start.value = d.start || "";
-end.value = d.end || "";
-takt.value = d.takt || 80;
-steps.value = d.steps || 49;
-actuals = new Map(d.actuals || []);
+  <script>
+    const WEATHER_FALLBACK_CITY = "Dresden";
+    const WEATHER_REFRESH_MS = 60 * 60 * 1000;
+    const MARKET_REFRESH_MS = 5 * 60 * 1000;
 
-render();
-});
+    const FINNHUB_API_KEY = "d2m820hr01qq6fopdpa0d2m820hr01qq6fopdpag";
+    let finnhubBackoffUntil = 0;
+    let lastSuccessfulStockItems = null;
 
-// ✅ Tabelle zeichnen
-function render() {
-body.innerHTML = "";
-if (!start.value) return;
+    const STOCKS = [
+      { name: "Nvidia", symbol: "NVDA", icon: "https://cdn.simpleicons.org/nvidia/76B900", type: "stock" },
+      { name: "Apple", symbol: "AAPL", icon: "https://cdn.simpleicons.org/apple/111111", type: "stock" },
+      { name: "AMD", symbol: "AMD", icon: "https://cdn.simpleicons.org/amd/ED1C24", type: "stock" },
+      { name: "Intel", symbol: "INTC", icon: "https://cdn.simpleicons.org/intel/0071C5", type: "stock" }
+    ];
 
-let time = new Date(start.value);
+    const CRYPTO = [
+      { name: "Bitcoin", id: "bitcoin", symbol: "BTC", icon: "https://cdn.simpleicons.org/bitcoin/F7931A", type: "crypto" },
+      { name: "XRP", id: "ripple", symbol: "XRP", icon: "https://cdn.simpleicons.org/xrp/23292F", type: "crypto" },
+      { name: "Ethereum", id: "ethereum", symbol: "ETH", icon: "https://cdn.simpleicons.org/ethereum/3C3C3D", type: "crypto" },
+      { name: "Solana", id: "solana", symbol: "SOL", icon: "https://cdn.simpleicons.org/solana/9945FF", type: "crypto" }
+    ];
 
-for (let i = 1; i <= steps.value; i++) {
+    const weatherMap = {
+      0: ["☀️", "Klar"],
+      1: ["🌤️", "Überwiegend klar"],
+      2: ["⛅", "Teilweise bewölkt"],
+      3: ["☁️", "Bedeckt"],
+      45: ["🌫️", "Nebel"],
+      48: ["🌫️", "Raureifnebel"],
+      51: ["🌦️", "Leichter Nieselregen"],
+      53: ["🌦️", "Nieselregen"],
+      55: ["🌧️", "Starker Nieselregen"],
+      56: ["🌧️", "Gefrierender Nieselregen"],
+      57: ["🌧️", "Starker gefrierender Nieselregen"],
+      61: ["🌦️", "Leichter Regen"],
+      63: ["🌧️", "Regen"],
+      65: ["🌧️", "Starker Regen"],
+      66: ["🌧️", "Gefrierender Regen"],
+      67: ["🌧️", "Starker gefrierender Regen"],
+      71: ["🌨️", "Leichter Schneefall"],
+      73: ["🌨️", "Schneefall"],
+      75: ["❄️", "Starker Schneefall"],
+      77: ["❄️", "Schneegriesel"],
+      80: ["🌦️", "Regenschauer"],
+      81: ["🌧️", "Starke Schauer"],
+      82: ["⛈️", "Heftige Schauer"],
+      85: ["🌨️", "Schneeschauer"],
+      86: ["❄️", "Starke Schneeschauer"],
+      95: ["⛈️", "Gewitter"],
+      96: ["⛈️", "Gewitter mit Hagel"],
+      99: ["⛈️", "Starkes Gewitter mit Hagel"]
+    };
 
-const tr = document.createElement("tr");
+    function updateClock() {
+      const now = new Date();
+      document.getElementById("clock").textContent =
+        now.toLocaleTimeString("de-DE", { hour: "2-digit", minute: "2-digit", second: "2-digit" });
+      document.getElementById("date").textContent =
+        now.toLocaleDateString("de-DE", { weekday: "long", day: "2-digit", month: "long", year: "numeric" });
+    }
 
-const td1 = document.createElement("td");
-td1.textContent = i;
-tr.appendChild(td1);
+    function setUpdatedLabel(id, textPrefix = "Aktualisiert") {
+      const now = new Date();
+      document.getElementById(id).textContent =
+        `${textPrefix}: ${now.toLocaleTimeString("de-DE", { hour: "2-digit", minute: "2-digit" })}`;
+    }
 
-const td2 = document.createElement("td");
-td2.textContent = time.toLocaleString();
-tr.appendChild(td2);
+    async function getCoordinates() {
+      const byBrowser = () => new Promise((resolve, reject) => {
+        if (!navigator.geolocation) {
+          reject(new Error("Geolocation nicht verfügbar"));
+          return;
+        }
+        navigator.geolocation.getCurrentPosition(
+          pos => resolve({
+            latitude: pos.coords.latitude,
+            longitude: pos.coords.longitude,
+            name: "Dein Standort"
+          }),
+          reject,
+          { enableHighAccuracy: false, timeout: 7000, maximumAge: 10 * 60 * 1000 }
+        );
+      });
 
-const td3 = document.createElement("td");
-const input = document.createElement("input");
-input.type = "datetime-local";
-input.value = actuals.get(i) || "";
+      const byFallbackCity = async () => {
+        const url = `https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(WEATHER_FALLBACK_CITY)}&count=1&language=de&format=json`;
+        const res = await fetch(url);
+        if (!res.ok) throw new Error("Geocoding fehlgeschlagen");
+        const data = await res.json();
+        if (!data.results || !data.results.length) throw new Error("Kein Ort gefunden");
+        const city = data.results[0];
+        return {
+          latitude: city.latitude,
+          longitude: city.longitude,
+          name: city.name + (city.country ? `, ${city.country}` : "")
+        };
+      };
 
-input.onchange = () => {
-if (input.value) actuals.set(i, input.value);
-else actuals.delete(i);
-save();
-};
+      try {
+        return await byBrowser();
+      } catch {
+        return await byFallbackCity();
+      }
+    }
 
-td3.appendChild(input);
-tr.appendChild(td3);
+    async function loadWeather() {
+      try {
+        const loc = await getCoordinates();
+        document.getElementById("locationLabel").textContent = `Standort: ${loc.name}`;
 
-body.appendChild(tr);
+        const url = new URL("https://api.open-meteo.com/v1/forecast");
+        url.searchParams.set("latitude", loc.latitude);
+        url.searchParams.set("longitude", loc.longitude);
+        url.searchParams.set("current", "temperature_2m,weather_code,wind_speed_10m,is_day");
+        url.searchParams.set("daily", "weather_code,temperature_2m_max,temperature_2m_min,precipitation_probability_max,sunrise,sunset");
+        url.searchParams.set("timezone", "auto");
+        url.searchParams.set("forecast_days", "5");
 
-time = new Date(time.getTime() + takt.value * 60000);
-}
-}
+        const res = await fetch(url);
+        if (!res.ok) throw new Error("Wetterdaten konnten nicht geladen werden");
+        const data = await res.json();
 
-// Events
-[start, end, takt, steps].forEach(el => el.onchange = save);
-</script>
+        const current = data.current;
+        const currentMap = weatherMap[current.weather_code] || ["🌡️", "Unbekannt"];
+        document.getElementById("weatherIcon").textContent = currentMap[0];
+        document.getElementById("weatherTemp").textContent = `${Math.round(current.temperature_2m)}°C`;
+        document.getElementById("weatherDesc").textContent = currentMap[1];
+        document.getElementById("windValue").textContent = `${Math.round(current.wind_speed_10m)} km/h`;
+        document.getElementById("rainValue").textContent = `${Math.round(data.daily.precipitation_probability_max?.[0] ?? 0)} %`;
+        document.getElementById("sunValue").textContent = current.is_day ? "Tag" : "Nacht";
 
+        const forecastList = document.getElementById("forecastList");
+        forecastList.innerHTML = "";
+
+        data.daily.time.forEach((dateStr, i) => {
+          const [icon, desc] = weatherMap[data.daily.weather_code[i]] || ["🌡️", "Unbekannt"];
+          const row = document.createElement("div");
+          row.className = "day-row";
+          row.innerHTML = `
+            <div>
+              <div class="day-name">${new Date(dateStr).toLocaleDateString("de-DE", { weekday: "long" })}</div>
+            </div>
+            <div class="day-icon">${icon}</div>
+            <div class="day-desc">${desc}</div>
+            <div class="day-temp">${Math.round(data.daily.temperature_2m_max[i])}° / ${Math.round(data.daily.temperature_2m_min[i])}°</div>
+          `;
+          forecastList.appendChild(row);
+        });
+
+        setUpdatedLabel("weatherUpdated");
+      } catch (error) {
+        document.getElementById("forecastList").innerHTML =
+          `<div class="status">Wetterdaten konnten nicht geladen werden: ${error.message}</div>`;
+        document.getElementById("weatherDesc").textContent = "Wetterdaten konnten nicht geladen werden";
+      }
+    }
+
+    function formatCurrency(value, isCrypto = false) {
+      if (value == null || Number.isNaN(value)) return "--";
+      const digits = value >= 1000 ? 0 : value >= 100 ? 2 : isCrypto ? 2 : 2;
+      return new Intl.NumberFormat("de-DE", {
+        style: "currency",
+        currency: "USD",
+        maximumFractionDigits: digits
+      }).format(value);
+    }
+
+    function formatDelta(delta) {
+      if (delta == null || Number.isNaN(delta)) return { text: "keine Änderung", cls: "neutral" };
+      if (delta > 0) return { text: `▲ ${delta.toFixed(2)}%`, cls: "up" };
+      if (delta < 0) return { text: `▼ ${Math.abs(delta).toFixed(2)}%`, cls: "down" };
+      return { text: "• 0.00%", cls: "neutral" };
+    }
+
+    function renderMarketCards(items) {
+      const grid = document.getElementById("stocksGrid");
+      grid.innerHTML = "";
+      items.forEach(item => {
+        const delta = formatDelta(item.changePct);
+        const card = document.createElement("article");
+        card.className = "stock-card";
+        card.innerHTML = `
+          <div class="stock-top">
+            <div class="asset">
+              <div class="logo">
+                <img src="${item.icon}" alt="${item.name} Logo" onerror="this.style.display='none'; this.parentElement.textContent='${item.symbol.slice(0,2)}';">
+              </div>
+              <div style="min-width:0;">
+                <div class="asset-name">${item.name}</div>
+                <div class="asset-symbol">${item.symbol}</div>
+              </div>
+            </div>
+          </div>
+          <div class="value">${formatCurrency(item.price, item.type === "crypto")}</div>
+          <div class="delta ${delta.cls}">${delta.text}</div>
+        `;
+        grid.appendChild(card);
+      });
+    }
+
+    async function loadMarketData() {
+      const status = document.getElementById("marketStatus");
+      status.textContent = "Börsen- und Kryptodaten werden aktualisiert…";
+
+      try {
+        const stockItems = await loadStocksRobust();
+        const cryptoItems = await loadCryptoRobust();
+
+        renderMarketCards([...stockItems, ...cryptoItems]);
+        status.textContent = "Live-Aktien und Kryptokurse aktiv.";
+        setUpdatedLabel("marketUpdated");
+      } catch (error) {
+        status.textContent = `Daten konnten nicht geladen werden: ${error.message}`;
+      }
+    }
+
+    async function readJsonOrThrow(res, label) {
+      let data = null;
+      const text = await res.text();
+
+      try {
+        data = text ? JSON.parse(text) : null;
+      } catch {
+        throw new Error(`${label}: ungültige Antwort`);
+      }
+
+      if (!res.ok) {
+        const detail = data?.error || data?.message || `${res.status} ${res.statusText}`;
+        throw new Error(`${label}: ${detail}`);
+      }
+
+      return data;
+    }
+
+    async function fetchFinnhubQuote(symbol) {
+      const url = `https://finnhub.io/api/v1/quote?symbol=${encodeURIComponent(symbol)}&token=${encodeURIComponent(FINNHUB_API_KEY)}`;
+      const res = await fetch(url, {
+        method: "GET",
+        headers: { "Accept": "application/json" },
+        cache: "no-store"
+      });
+
+      if (res.status === 429) {
+        throw new Error(`Finnhub ${symbol}: 429`);
+      }
+
+      const data = await readJsonOrThrow(res, `Finnhub ${symbol}`);
+
+      if (data?.error) {
+        throw new Error(`Finnhub ${symbol}: ${data.error}`);
+      }
+
+      return data;
+    }
+
+    async function loadStocksRobust() {
+      if (!FINNHUB_API_KEY || FINNHUB_API_KEY === "DEIN_FINNHUB_API_KEY_HIER") {
+        throw new Error("Finnhub API-Key fehlt");
+      }
+
+      const now = Date.now();
+      if (finnhubBackoffUntil && now < finnhubBackoffUntil) {
+        if (lastSuccessfulStockItems) {
+          document.getElementById("marketStatus").textContent =
+            "Finnhub Rate-Limit aktiv. Es werden zuletzt geladene Aktienwerte angezeigt.";
+          return lastSuccessfulStockItems;
+        }
+        const minutesLeft = Math.max(1, Math.ceil((finnhubBackoffUntil - now) / 60000));
+        throw new Error(`Finnhub Rate-Limit aktiv, neuer Versuch in ca. ${minutesLeft} Min.`);
+      }
+
+      try {
+        const results = [];
+
+        for (const stock of STOCKS) {
+          const quote = await fetchFinnhubQuote(stock.symbol);
+          results.push({
+            ...stock,
+            price: typeof quote?.c === "number" && quote.c > 0 ? quote.c : null,
+            changePct: typeof quote?.dp === "number" ? quote.dp : null
+          });
+          await new Promise(resolve => setTimeout(resolve, 250));
+        }
+
+        const successCount = results.filter(x => x.price != null).length;
+        if (!successCount) {
+          throw new Error("keine Kursdaten erhalten");
+        }
+
+        lastSuccessfulStockItems = results;
+        finnhubBackoffUntil = 0;
+        return results;
+      } catch (e) {
+        const msg = String(e.message || e);
+
+        if (msg.includes("429")) {
+          finnhubBackoffUntil = Date.now() + 30 * 60 * 1000;
+          if (lastSuccessfulStockItems) {
+            document.getElementById("marketStatus").textContent =
+              "Finnhub Rate-Limit erreicht. Es werden zuletzt geladene Aktienwerte angezeigt.";
+            return lastSuccessfulStockItems;
+          }
+          throw new Error("Finnhub Rate-Limit erreicht. Bitte später erneut laden.");
+        }
+
+        if (lastSuccessfulStockItems) {
+          document.getElementById("marketStatus").textContent =
+            "Aktien konnten nicht frisch geladen werden. Es werden zuletzt geladene Werte angezeigt.";
+          return lastSuccessfulStockItems;
+        }
+
+        throw new Error(`Aktien-API: ${msg}`);
+      }
+    }
+
+    async function loadCryptoRobust() {
+      const coinIds = CRYPTO.map(c => c.id).join(",");
+      const cryptoUrl =
+        `https://api.coingecko.com/api/v3/simple/price?ids=${encodeURIComponent(coinIds)}&vs_currencies=usd&include_24hr_change=true`;
+
+      const res = await fetch(cryptoUrl, {
+        method: "GET",
+        headers: { "Accept": "application/json" },
+        cache: "no-store"
+      });
+
+      const cryptoData = await readJsonOrThrow(res, "CoinGecko");
+
+      return CRYPTO.map(coin => ({
+        ...coin,
+        price: cryptoData?.[coin.id]?.usd ?? null,
+        changePct: cryptoData?.[coin.id]?.usd_24h_change ?? null
+      }));
+    }
+
+    async function toggleFullscreen(forceOn) {
+      try {
+        if (forceOn) {
+          if (!document.fullscreenElement) {
+            await document.documentElement.requestFullscreen();
+          }
+        } else {
+          if (document.fullscreenElement) {
+            await document.exitFullscreen();
+          }
+        }
+      } catch (e) {
+        console.warn("Vollbild fehlgeschlagen", e);
+      }
+    }
+
+    function setupFullscreenToggle() {
+      const toggle = document.getElementById("fullscreenToggle");
+      toggle.addEventListener("change", e => toggleFullscreen(e.target.checked));
+
+      document.addEventListener("fullscreenchange", () => {
+        toggle.checked = !!document.fullscreenElement;
+      });
+    }
+
+    function init() {
+      updateClock();
+      setInterval(updateClock, 1000);
+
+      setupFullscreenToggle();
+
+      loadWeather();
+      loadMarketData();
+
+      setInterval(loadWeather, WEATHER_REFRESH_MS);
+      setInterval(loadMarketData, MARKET_REFRESH_MS);
+    }
+
+    init();
+  </script>
 </body>
 </html>
