@@ -199,7 +199,9 @@ async function loadState() {
 
     if (obj.start) startInput.value = obj.start;
     if (obj.end) endInput.value = obj.end;
-    if (obj.takt) taktInput.value = obj.takt;
+    if (obj.takt) {
+  taktInput.value = Number(obj.takt);
+}
     if (obj.steps) stepCountInput.value = obj.steps;
 
     overrides = new Map(obj.overrides || []);
