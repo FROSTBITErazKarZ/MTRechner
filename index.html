@@ -279,7 +279,7 @@ async function loadState() {
           taktNote.className = "text-amber-600 dark:text-amber-400";
         } else {
           taktInput.disabled = true;
-          taktInput.value = nf2.format(a.takt);
+          taktInput.value = Number(a.takt).toFixed(2);
           taktNote.textContent = `Berechnet aus Start→Ende: ${nf2.format(a.takt)} min`;
           taktNote.className = "text-gray-500 dark:text-gray-400";
         }
