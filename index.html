@@ -184,7 +184,14 @@ async function saveState() {
 
 
 async function loadState() {
-  try {
+  
+  console.log("window.fb =", window.fb);
+  console.log("window.db =", window.db);
+
+  if (!window.fb || !window.db) {
+    console.error("Firebase nicht initialisiert");
+    return false;
+  }
     const snap = await window.fb.getDoc(
       window.fb.doc(window.db, "milchtakt", DOC_ID)
     );
