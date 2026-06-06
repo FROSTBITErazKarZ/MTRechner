@@ -163,23 +163,25 @@
 
     
 async function saveState() {
-  const obj = {
-    start: startInput.value || null,
-    end: endInput.value || null,
-    takt: getDefaultTakt() || 80,
-    steps: getStepCount(),
-    overrides: Array.from(overrides.entries()),
-    actuals: Array.from(actuals.entries())
-  };
+const obj = {
+  start: startInput.value || null,
+  end: endInput.value || null,
+  takt: getDefaultTakt() || 80,
+  steps: getStepCount(),
+  overrides: Array.from(overrides.entries()),
+  actuals: Array.from(actuals.entries())
+};
 
-  try {
-    await window.fb.setDoc(
-      window.fb.doc(window.db, "milchtakt", DOC_ID),
-      obj
-    );
-  } catch (e) {
-    console.error(e);
-  }
+try {
+  const cleanObj = sanitize(obj); // 👈 HIER
+
+  await window.fb.setDoc(
+    window.fb.doc(window.db, "milchtakt", DOC_ID),
+    cleanObj
+  );
+} catch (e) {
+  console.error(e);
+}
 }
     
 async function loadState() {
