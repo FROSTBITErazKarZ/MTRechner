@@ -168,8 +168,13 @@ async function saveState() {
     end: endInput.value || null,
     takt: getDefaultTakt() || 80,
     steps: getStepCount(),
-    overrides = new Map(Array.isArray(obj.overrides) ? obj.overrides : []);
-    actuals = new Map(Array.isArray(obj.actuals) ? obj.actuals : []);
+    overrides = new Map(
+       Array.isArray(obj.overrides) ? obj.overrides : []
+    );
+
+    actuals = new Map(
+      Array.isArray(obj.actuals) ? obj.actuals : []
+    );
   };
 
   try {
