@@ -174,8 +174,7 @@ async function saveState() {
 
   try {
     await window.fb.setDoc(
-      window.fb.doc(window.db, "milchtakt", DOC_ID),
-      obj.takte = obj.takte.flat(Infinity);
+      window.fb.setDoc(window.fb.doc(window.db, "milchtakt", DOC_ID), obj)
     );
   } catch (e) {
     console.error(e);
@@ -196,7 +195,8 @@ async function loadState() {
     if (!snap.exists()) return false;
 
     const obj = snap.data();
-    console.log(obj);
+    console.log("OBJ:", obj);
+    console.log(JSON.stringify(obj, null, 2));
 
     if (obj.start) startInput.value = obj.start;
     if (obj.end) endInput.value = obj.end;
