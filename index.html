@@ -168,13 +168,8 @@ async function saveState() {
     end: endInput.value || null,
     takt: getDefaultTakt() || 80,
     steps: getStepCount(),
-    overrides = new Map(
-       Array.isArray(obj.overrides) ? obj.overrides : []
-    );
-
-    actuals = new Map(
-      Array.isArray(obj.actuals) ? obj.actuals : []
-    );
+    overrides: Array.from(overrides.entries()),
+    actuals: Array.from(actuals.entries())
   };
 
   try {
@@ -210,8 +205,13 @@ async function loadState() {
 }
     if (obj.steps) stepCountInput.value = obj.steps;
 
-    overrides = new Map(obj.overrides || []);
-    actuals = new Map(obj.actuals || []);
+    overrides = new Map(
+  Array.isArray(obj.overrides) ? obj.overrides : []
+);
+
+actuals = new Map(
+  Array.isArray(obj.actuals) ? obj.actuals : []
+);
 
     return true;
 
