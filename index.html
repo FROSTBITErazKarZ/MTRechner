@@ -446,7 +446,7 @@ async function loadState() {
     });
 
     // Init
-(async function init() {
+async function init() {
   const now = new Date();
   now.setSeconds(0, 0);
 
@@ -456,7 +456,7 @@ async function loadState() {
 
   await loadState();
   render();
-})();
+}
   </script>
 </body>
 
@@ -478,6 +478,8 @@ async function loadState() {
 
   window.db = db;
   window.fb = { doc, setDoc, getDoc };
+
+  await init();
 </script>
 
 </html>
