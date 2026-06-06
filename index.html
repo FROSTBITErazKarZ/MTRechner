@@ -174,7 +174,7 @@ async function saveState() {
 
   try {
     await window.fb.setDoc(
-      window.fb.setDoc(window.fb.doc(window.db, "milchtakt", DOC_ID),
+      window.fb.doc(window.db, "milchtakt", DOC_ID),
       obj
     );
   } catch (e) {
