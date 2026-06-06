@@ -184,14 +184,7 @@ async function saveState() {
 
 
 async function loadState() {
-  
-  console.log("window.fb =", window.fb);
-  console.log("window.db =", window.db);
-
-  if (!window.fb || !window.db) {
-    console.error("Firebase nicht initialisiert");
-    return false;
-  }
+  try {
     const snap = await window.fb.getDoc(
       window.fb.doc(window.db, "milchtakt", DOC_ID)
     );
@@ -209,6 +202,7 @@ async function loadState() {
     actuals = new Map(obj.actuals || []);
 
     return true;
+
   } catch (e) {
     console.error(e);
     return false;
@@ -453,7 +447,7 @@ async function loadState() {
     });
 
     // Init
-async function init() {
+window.init = async function () {
   const now = new Date();
   now.setSeconds(0, 0);
 
