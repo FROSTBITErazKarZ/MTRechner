@@ -168,8 +168,8 @@ async function saveState() {
     end: endInput.value || null,
     takt: getDefaultTakt() || 80,
     steps: getStepCount(),
-    overrides: Array.from(overrides.entries()),
-    actuals: Array.from(actuals.entries())
+    overrides: Object.fromEntries(overrides),
+    actuals: Object.fromEntries(actuals),
   };
 
   try {
