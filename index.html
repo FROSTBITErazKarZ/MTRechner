@@ -185,13 +185,18 @@ async function saveState() {
 
 async function loadState() {
   try {
+    console.log("Lade aus Firestore...");
+
     const snap = await window.fb.getDoc(
       window.fb.doc(window.db, "milchtakt", DOC_ID)
     );
 
+    console.log("Dokument existiert:", snap.exists());
+
     if (!snap.exists()) return false;
 
     const obj = snap.data();
+    console.log(obj);
 
     if (obj.start) startInput.value = obj.start;
     if (obj.end) endInput.value = obj.end;
