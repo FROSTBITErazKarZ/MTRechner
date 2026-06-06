@@ -183,20 +183,30 @@ async function saveState() {
 }
 
 
-    function loadState() {
-      try {
-        const raw = localStorage.getItem(LS_KEY);
-        if (!raw) return false;
-        const obj = JSON.parse(raw);
-        if (obj.start) startInput.value = obj.start;
-        if (obj.end) endInput.value = obj.end;
-        if (obj.takt) taktInput.value = obj.takt;
-        if (obj.steps) stepCountInput.value = obj.steps;
-        overrides = new Map(obj.overrides || []); // ignoriert in UI
-        actuals = new Map(obj.actuals || []);
-        return true;
-      } catch { return false; }
-    }
+async function loadState() {
+  try {
+    const snap = await window.fb.getDoc(
+      window.fb.doc(window.db, "milchtakt", DOC_ID)
+    );
+
+    if (!snap.exists()) return false;
+
+    const obj = snap.data();
+
+    if (obj.start) startInput.value = obj.start;
+    if (obj.end) endInput.value = obj.end;
+    if (obj.takt) taktInput.value = obj.takt;
+    if (obj.steps) stepCountInput.value = obj.steps;
+
+    overrides = new Map(obj.overrides || []);
+    actuals = new Map(obj.actuals || []);
+
+    return true;
+  } catch (e) {
+    console.error(e);
+    return false;
+  }
+}
 
     function computeAutoTakt(start, end, steps) {
       if (!start || !end) return null;
@@ -436,13 +446,17 @@ async function saveState() {
     });
 
     // Init
-    (function init() {
-      const now = new Date();
-      now.setSeconds(0, 0);
-      if (!startInput.value) startInput.value = toDatetimeLocalValue(now);
-      loadState();
-      render();
-    })();
+(async function init() {
+  const now = new Date();
+  now.setSeconds(0, 0);
+
+  if (!startInput.value) {
+    startInput.value = toDatetimeLocalValue(now);
+  }
+
+  await loadState();
+  render();
+})();
   </script>
 </body>
 
